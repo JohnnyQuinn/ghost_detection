@@ -1,0 +1,187 @@
+<html>
+	<head>
+		<title>GHOST Detection</title>
+		<!-- Created by John Francis Tsukasa Quinn
+			 Contact: johnny.quinn.dev@gmail.com
+		-->
+
+		<script src="easytimer.min.js"></script>
+		<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
+
+		<script type="text/javascript">
+			var speech = new SpeechSynthesisUtterance('');
+			speech.lang = 'en-US';
+
+			var timerInstance = new Timer();
+
+			var detectionStarted = false;
+
+			var mouseDetectAllow = true;
+
+			var alertNum = 0;
+
+			var timer = new Timer();
+			timer.addEventListener('secondsUpdated', function (e) {
+    			$('#timer').html(timer.getTimeValues().toString());
+			});
+
+			function keyBoardDetect() {
+				if (detectionStarted) {
+					if(speechCheck()){
+						speech = new SpeechSynthesisUtterance('Keyboard use detected!');
+	    				window.speechSynthesis.speak(speech);
+	    			}
+    				var row = document.createElement("tr");
+    				var log = document.getElementById("log");
+    				log.appendChild(row);
+    				var rowData = document.createElement("td");
+					var alert = document.createTextNode("Keyboard use detected!  ");
+					rowData.appendChild(alert);
+					row.appendChild(rowData);
+					rowData.style.border = "1px solid black";
+					displayTimeStamp(row);
+					alertNum++; 
+					updateAlertNum();
+    			};
+			}
+
+			function mouseDetect() {
+				if (detectionStarted && mouseDetectAllow) {
+					mouseDetectAllow = false;
+					setTimeout(function(){mouseDetectAllow = true;}, 1000);
+					if(speechCheck()){
+						speech = new SpeechSynthesisUtterance('Mouse use detected!');
+	    				window.speechSynthesis.speak(speech);
+    				}
+    				var row = document.createElement("tr");
+    				var log = document.getElementById("log");
+    				log.appendChild(row);
+    				var rowData = document.createElement("td");
+					var alert = document.createTextNode("Mouse use detected!  ");
+					rowData.appendChild(alert);
+					row.appendChild(rowData);
+					rowData.style.border = "1px solid black";
+					displayTimeStamp(row);
+					alertNum++;
+					updateAlertNum();
+    			};
+			}
+
+			function displayTimeStamp(parent) {
+				var rowData = document.createElement("td");
+				var timestamp = document.createTextNode(timer.getTimeValues());
+				rowData.appendChild(timestamp);
+				parent.appendChild(rowData);
+				rowData.style.border = "1px solid black";	
+			}
+
+			function start() {
+				document.getElementById('startButton').disabled = true;	
+				document.getElementById('resetButton').disabled = true;
+				document.getElementById('stopButton').disabled = false;
+				timer.start();
+				if (speechCheck()) {
+					speech = new SpeechSynthesisUtterance('Ghost detection started');
+					window.speechSynthesis.speak(speech);
+				}
+				setTimeout(function(){detectionStarted = true;}, 100);
+			}
+
+			function stopButton() {
+				window.speechSynthesis.cancel();
+				detectionStarted = false;
+				document.getElementById('startButton').disabled = false;
+				document.getElementById('resetButton').disabled = false;
+				document.getElementById('stopButton').disabled = true;
+				timer.pause();	
+			}
+
+			function resetButton() {
+				clearLog();
+				document.getElementById('startButton').disabled = true;
+				document.getElementById('resetButton').disabled = true;
+				document.getElementById('stopButton').disabled = false;
+				timer.reset();
+				if(speechCheck()){
+					speech = new SpeechSynthesisUtterance('Ghost detection started');
+	    			window.speechSynthesis.speak(speech);
+    			}
+    			setTimeout(function(){detectionStarted = true;}, 100);
+    			alertNum = 0; 
+    			updateAlertNum();
+			}
+
+			function clearLog() {
+				var log = document.getElementById('log');
+				var childNum = document.getElementById('log').childElementCount;
+				while(log.childElementCount > 2){
+					log.removeChild(log.lastChild);
+				}
+			}
+
+			function firstLoad(){
+				document.getElementById('stopButton').disabled = true;
+				document.getElementById('resetButton').disabled = true;
+			}
+
+			function speechCheck() {
+				if (document.getElementById('speechCheckbox').checked) {
+					return true;
+				}
+				else {
+					return false;
+				}
+			}
+
+			function updateAlertNum() {
+				var numToString = alertNum.toString();
+				document.getElementById("alertsNumID").innerHTML = numToString;
+			}
+
+			window.onload = firstLoad;
+			window.onclick = mouseDetect;
+			window.onmousemove = mouseDetect;
+			window.onscroll = mouseDetect;
+			window.onkeydown = keyBoardDetect;
+		</script>
+		<style type="text/css">
+			#timer {
+				font-size: 60;
+			}
+
+			button {
+				padding: 15px 32px;
+				font-size: 30;
+				text-align: center;	
+			}
+
+			table, tr, th {
+				border: 1px solid black;
+				font-size: 30;
+			}
+
+			input[type=checkbox]{
+			  zoom: 1.5;	
+			}
+		</style>
+	</head>
+
+	<body>
+		<center><h1 style="font-size:70">Ghost Detection</h1></center>	
+		<center><button id="startButton" type="button" onclick="start()">START</button><button id="stopButton" onclick="stopButton()">STOP</button><button id="resetButton" onclick="resetButton()">RESTART</button></center>
+		<p></p>
+		<center><input id="speechCheckbox" type='checkbox' checked><font id="checkboxtext" size="5">Allow voice alerts</font></center>
+		<center><div id="timer">00:00:00</div></center>
+		<center>
+			<table id="log">
+				<caption style="text-align:left">Log:</caption>
+				<tr>
+					<th id="alertsTitle" style="text-align:left; padding-right:230px;">Alerts: <span id="alertsNumID">0</span></th>
+					<th style="text-align:left; padding-right:40px;">Time:</th>
+				</tr>
+			</table>
+		</center>
+		
+	</body>
+
+</html>
